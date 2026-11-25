@@ -7,7 +7,7 @@ from sqlalchemy import create_engine, pool
 
 import app.models  # noqa: F401  모델을 불러와 metadata에 등록
 from app.core.config import get_settings
-from app.core.database import normalize_db_url
+from app.core.database import connect_args_for, normalize_db_url
 from app.models.base import Base
 
 config = context.config
@@ -31,7 +31,8 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    engine = create_engine(_url(), poolclass=pool.NullPool)
+    url = _url()
+    engine = create_engine(url, poolclass=pool.NullPool, connect_args=connect_args_for(url))
     with engine.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
         with context.begin_transaction():

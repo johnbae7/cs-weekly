@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 
-from app.core.config import get_settings
+from app.core.config import check_required_secrets, get_settings
 from app.core.metrics import HTTP_ERRORS, HTTP_LATENCY, HTTP_REQUESTS, SKIP_PATHS
 from app.routers import auth, deliveries, health, recipients, reports, uploads
 
@@ -25,6 +25,7 @@ def reset_stale_generating() -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    check_required_secrets(get_settings())  # 비밀값 누락 시 시작 실패
     reset_stale_generating()
     yield
 

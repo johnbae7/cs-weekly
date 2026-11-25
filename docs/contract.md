@@ -17,8 +17,8 @@
 
 | 이미지 | Dockerfile (빌드 폴더) | 포트 | 실행 사용자 |
 |---|---|---|---|
-| backend | `backend/Dockerfile` (`backend/`) | 8000 | UID 10001 (root 아님) |
-| frontend | `frontend/Dockerfile` (`frontend/`) | 8080 | UID 101 (root 아님, nginx-unprivileged) |
+| backend | `backend/Dockerfile` (`backend/`) — python:3.11-slim | 8000 | UID 10001 (root 아님) |
+| frontend | `frontend/Dockerfile` (`frontend/`) — 빌드 node:24-alpine, 실행 nginx-unprivileged:1.30-alpine | 8080 | UID 101 (root 아님) |
 
 - 두 포트 모두 1024 이상입니다.
 - 실행 사용자를 숫자 UID로 지정해, Kubernetes `runAsNonRoot: true` 검사를 통과할 수 있게 했습니다.
@@ -44,8 +44,8 @@
 
 | 변수 | 비밀값 | 예시·기본값 | 설명 |
 |---|---|---|---|
-| `DATABASE_URL` | 🔒 | `postgresql+psycopg://<user>:<pw>@<host>:5432/<db>` | DB 연결 문자열 (비밀번호 포함). 개발 Supabase, 배포 RDS 앱 전용 계정 |
-| `JWT_SECRET` | 🔒 | (임의 문자열) | 로그인 토큰 서명 키 |
+| `DATABASE_URL` | 🔒 | `postgresql+psycopg://<user>:<pw>@<host>:5432/<db>` | DB 연결 문자열 (비밀번호 포함). 개발 Supabase, 배포 RDS 앱 전용 계정. 연결 시간 제한 3초 |
+| `JWT_SECRET` | 🔒 | (임의의 긴 문자열) | 로그인 토큰 서명 키. 비어 있거나 `changeme`이면 앱이 시작되지 않음 |
 | `ANTHROPIC_API_KEY` | 🔒 | | Claude API 키 |
 | `GEMINI_API_KEY` | 🔒 | | Gemini API 키 |
 | `GROQ_API_KEY` | 🔒 | | Groq API 키 |
@@ -58,7 +58,7 @@
 | `AWS_REGION` | | `ap-northeast-2` | SES·RDS 리전 |
 | `APP_BASE_URL` | | (Ingress 주소) | 메일 맨 아래 서비스 링크 |
 
-- SES 호출 권한: IAM 역할로 주면 키가 필요 없습니다. 액세스 키로 주면 `AWS_ACCESS_KEY_ID`·`AWS_SECRET_ACCESS_KEY`를 🔒로 추가합니다. 어느 쪽인지는 박준우 님이 정합니다.
+- SES 호출 권한은 **IAM 역할**로 부여합니다. `AWS_ACCESS_KEY_ID`·`AWS_SECRET_ACCESS_KEY`는 쓰지 않습니다.
 - frontend 컨테이너는 환경 변수가 없습니다 (빌드 결과 정적 파일만).
 
 ## 5. `/metrics` 지표
@@ -78,6 +78,7 @@
 - `/health`, `/health/ready`, `/metrics` 호출은 요청 수에 넣지 않습니다.
 - 403·409 같은 권한·상태 거부는 `status` 라벨과 `cs_security_events_total`로 봅니다.
 - 이 밖에 `prometheus_client` 기본 지표(프로세스 CPU·메모리 등)가 함께 나옵니다.
+- **Pod당 uvicorn 프로세스는 1개입니다.** 지표가 프로세스 메모리에 저장되므로 `--workers`를 2 이상으로 쓰지 않습니다. 처리량을 늘릴 때는 Pod 수(replica)를 늘립니다.
 
 ## 6. 로그
 
@@ -109,3 +110,4 @@
 | 날짜 | 변경 | 작성 |
 |---|---|---|
 | 2026-11-25 | 최초 작성 (박준우 요청 반영: health 분리, 비밀값 표시, 지표, 상대 경로, 로그·비루트·포트, SIGTERM, 마이그레이션) | 김선 |
+| 2026-11-25 | 박준우 리뷰 반영: Node 24, nginx 1.30, DB 연결 시간 제한 3초, JWT_SECRET 검사, Pod당 프로세스 1개, SES는 IAM 역할 | 김선 |

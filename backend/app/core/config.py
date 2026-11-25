@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     api_prefix: str = "/api"
 
     database_url: str = ""
-    jwt_secret: str = "changeme"
+    jwt_secret: str = ""  # 비어 있거나 changeme이면 앱 시작 실패 (check_required_secrets)
 
     # LLM 실패 전환 (AD-1): 쉼표로 구분한 순서. 앞 업체 실패 시 다음 업체
     llm_provider_order: str = "claude,gemini,groq"
@@ -31,6 +31,15 @@ class Settings(BaseSettings):
     smtp_password: str = ""
 
     app_base_url: str = "http://localhost:5173"
+
+
+# 배포 때 Secret 주입이 빠졌는지 시작 시점에 바로 알기 위한 검사
+WEAK_SECRETS = {"", "changeme"}
+
+
+def check_required_secrets(settings: "Settings") -> None:
+    if settings.jwt_secret.strip() in WEAK_SECRETS:
+        raise RuntimeError("JWT_SECRET이 비어 있거나 기본값(changeme)입니다. 임의의 긴 문자열로 설정하십시오.")
 
 
 @lru_cache

@@ -19,6 +19,17 @@ def normalize_db_url(url: str) -> str:
     return url
 
 
+# DB가 응답하지 않을 때 /health/ready 등이 오래 멈추지 않도록 연결 시간 제한(초)
+DB_CONNECT_TIMEOUT = 3
+
+
+def connect_args_for(url: str) -> dict:
+    """PostgreSQL이면 연결 시간 제한을 넣음 (테스트용 sqlite에는 넣지 않음)."""
+    if url.startswith("postgresql"):
+        return {"connect_timeout": DB_CONNECT_TIMEOUT}
+    return {}
+
+
 def get_engine() -> Engine | None:
     """DATABASE_URL이 없으면 None (DB 없이도 앱과 /health는 뜸)."""
     global _engine
@@ -26,7 +37,7 @@ def get_engine() -> Engine | None:
     if not url:
         return None
     if _engine is None:
-        _engine = create_engine(url, pool_pre_ping=True)
+        _engine = create_engine(url, pool_pre_ping=True, connect_args=connect_args_for(url))
         SessionLocal.configure(bind=_engine)
     return _engine
 
