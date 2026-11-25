@@ -1,0 +1,14 @@
+# 이 파일에 적힌 파일을 바꾸는 PR에는 아래 사람이 리뷰어로 자동 지정됩니다.
+# 약속값·이미지·빌드 워크플로가 바뀌면 배포에 영향이 있으므로 박준우(Junu-Park) 리뷰.
+# 김선(ksunnyoo)을 함께 적은 이유: 박준우 님이 직접 올린 PR은 본인이 승인할 수 없어서, 다른 한 명이 승인할 수 있게 함.
+#
+# 주의: 폴더별 담당(frontend, backend 등)은 여기 넣지 않습니다.
+#       "Require review from Code Owners"를 켜면 혼자 담당인 폴더의 PR은 본인이 승인할 수 없어 머지가 막히기 때문입니다.
+
+/docs/contract.md @Junu-Park @ksunnyoo
+/backend/Dockerfile @Junu-Park @ksunnyoo
+/frontend/Dockerfile @Junu-Park @ksunnyoo
+/backend/alembic.ini @Junu-Park @ksunnyoo
+/backend/app/core/metrics.py @Junu-Park @ksunnyoo
+/.github/workflows/ @Junu-Park @ksunnyoo
+/.github/CODEOWNERS @Junu-Park @ksunnyoo
