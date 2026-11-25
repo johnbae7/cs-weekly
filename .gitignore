@@ -1,0 +1,37 @@
+# 비밀값 (절대 커밋 금지)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+kubeconfig*
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+dist/
+*.log
+
+# 편집기·OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
+
+# 개인 작업 파일
+*.local
+tmp/
+
+# Claude 개인 설정 (공용 CLAUDE.md는 커밋)
+.claude/settings.local.json
+CLAUDE.local.md
